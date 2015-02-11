@@ -4,19 +4,22 @@ require_once 'include/class.php';
 fb::info('debug started');
 session_start();
 $analyse = new analyse();
+$admin = new admin();
 ?>
 <head>
 	<link rel="stylesheet" type="text/css" href="style/style.css">
 </head>
 <body>
+<div>
+	<h1><a href="admin.php" class="retourner"><-- Retourner</a></h1>
+</div>
 <?php
-if($_SESSION['admin'] == 'admin'){
+if($admin->is_admin()) {
 	// admin controle panel
-	$admin = new admin();
 	if (!isset($_GET['admin'])) {
 		$control = array('members','files','Affichage','add_affichage');
 		foreach ($control as $key) {
-			echo "<li><a href=admin.php?admin=$key&section=$key>".$key."</a></li>";
+			echo "<h1><li><a href=admin.php?admin=$key&section=$key>".$key."</a></li></h1>";
 		}
 	}elseif ($_GET['admin'] == 'members') {?>
 		<form method='post' action='http://newbooks/admin.php?admin=members'>
@@ -82,10 +85,11 @@ if($_SESSION['admin'] == 'admin'){
 		}
 		?>
 		<form action="admin.php?admin=add_affichage" method="post" class="form">
-			<input type="text" name="title" placeholder="Title"/><br />
 			<input type="text" name="groupe" placeholder="Groupe(s)"/><br />
 			<input type="text" name="module" placeholder="Module"/><br />
 			<textarea name="affichage" cols="30" rows="10" placeholder="Affichage"></textarea ><br />
+			<input type="text" name="linktitle" placeholder="Link Title (Optional)"/><br />
+			<input type="text" name="link" placeholder="Link (Optional)"/><br />
 			<input type="submit" name="submit" value="Add" class="buttons"/>
 		</form >
 		<?php

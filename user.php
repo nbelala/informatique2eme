@@ -12,22 +12,24 @@ if($_SESSION['user'] == "user"){
 ?>
 <html>
 <head>
-	<title>Books</title>
+	<title>s'inscrire</title>
 	<script src="scripts/jquery.js"></script>
 	<script src="scripts/public.js"></script>
 	<link rel="stylesheet" href="style/style.css" type="text/css"/>
 </head>
+<body>
+<div>
+	<h1><a href="index.php" class="retourner"><-- Retourner</a></h1>
+</div>
 <?php
 if (isset($_GET['login'])) {
-	fb::info('get is set to login');
-	// here goes the login script
 	if (isset($_POST['submit'])) {
 		fb::info('form was submited');
 		// here goes the query of loggin
 		$user_login = new user_login();
 	}
 ?>
-<body>
+
 <!-- this is the login form -->
 	<div class="form">
 		<h1>Log in :</h1>
@@ -51,12 +53,11 @@ if (isset($_GET['login'])) {
 		</div>
 		<div class="submit">
 			<input class="button" type="submit" name="submit" value="Log in"/><br/><br/>
-			<p>Or</p>
-			<a href="user.php?sub&section=login"><u>Subscribe</u></a>
+			<p>Ou</p>
+			<a href="user.php?sub&section=login"><u>S'inscrire</u></a>
 		</div>
 		</form>
 	</div>
-</body>
 <?php
 }elseif (isset($_GET['sub'])) {    // here goes the subscib form validation
 	if(isset($_POST['submit'])){
@@ -64,14 +65,13 @@ if (isset($_GET['login'])) {
 		 $new_user = new user_subscribe();
 	}
 	?>
-<body>
 <!-- this is the subscribe form -->
 <div class="form">
-	<h1>Subscribe :</h1>
+	<h1>S'inscrire</h1>
 <form action="user.php?sub" method="post">
 	<div class="errors">
 		<?php
-		if(isset($_POST['submit'])){
+		if(isset($_POST['submit'])) {
 			$new_user->errors();
 		}
 		?>
@@ -99,7 +99,7 @@ if (isset($_GET['login'])) {
 </div>
 <div class="submit">
 	<input class="button" type="submit" name="submit" value="subscribe"/><br/><br/>
-	Already have account : <a href="user.php?login&section=subscribe">Log in </a>
+	Deja abonne : <a href="user.php?login&section=subscribe">Log in </a>
 </div>
 </form>
 </div>

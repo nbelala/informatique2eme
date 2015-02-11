@@ -14,5 +14,4 @@ $(document).ready(function(){
   $('.add').click(function() {
     $(".here").append('<input type="file" name="file[]" placeholder="select your file" /><br />');
   });
-  
 });

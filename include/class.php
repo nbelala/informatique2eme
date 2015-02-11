@@ -16,10 +16,10 @@ class connect {
 		$database = database::$database;
 		$this->mysqli = new mysqli($host,$name,$pass,$database);
 		if(!$this->mysqli->connect_errno) {
-			fb::info('connected to database '.$this->mysqli->connect_errno);
+			fb::info('connected to database error :'.$this->mysqli->connect_errno);
 			return $this->mysqli;
 		}else {
-			fb::error('cant connect to database');
+			fb::error('cant connect to database '.$this->mysqli->connect_error);
 			die('cant connect to database <br>'.$this->mysqli->connect_error);
 		}
 	}
@@ -84,7 +84,7 @@ class upload {
 }
 class crypt
 {
-	public static function crypt_a($name){
+	public static function crypt_a($name) {
 		$name = str_split($name);
 		fb::error(count($name));
 		for ($i = 0; $i < count($name); $i++) {
@@ -96,7 +96,7 @@ class crypt
 		$name = implode("", $name);
 		return $name;
 	}
-	public static function crypt_a_reverse($name){
+	public static function crypt_a_reverse($name) {
 		$name = str_split($name);
 		for($i = 0; $i < count($name); $i++){
 			$x = $name[$i + 1];
@@ -109,7 +109,7 @@ class crypt
 		$name = implode("", $name);
 		return $name;
 	}
-	public static function crypt_b($name){
+	public static function crypt_b($name) {
 		$array = explode(" ", $name);
 		print_r($array);
 	}
@@ -117,31 +117,30 @@ class crypt
 class get_books {
 	public static function get() {
 		$section = $_GET['section'];
-		// query to get books "select * from books WHERE type='$this->section' AND level='$level'"
 		$connect = new connect();
-		$result = $connect->query("select * from books WHERE module='$section'");
+		$result = $connect->query("select * from books WHERE module='$section' ORDER BY id DESC");
 		$num = $result->num_rows;
 		echo "<ol>";
-		echo "<h2>There is " . $num . " file(s) </h2>";
+		echo "<h2> " . $num . " Document(s) </h2>";
 		echo "<div class='list'>";
 		while($row = $result->fetch_object()) {
 			echo "<li class='bottom'>";
 			echo "<a class='title' href='{$row->location}'>{$row->title}</a>";
-			echo '<br> added by : ' . $row->addedby." / date : ".$row->addedtime;
+			echo '<br> Ajouter Par : ' . $row->addedby." / date : ".$row->addedtime;
 			echo "</li>";
 		}
 		echo "</div></ol>";
 	}
-	public static function set($title,$location){
+	public static function set($title,$location) {
 		$connect = new connect();
-		$module = $_POST['module'];
+		$module = strip_tags($_POST['module']);
 		$addedtime = date('y/m/d  h:i');
 		$addedby = $_SESSION['name'];
-		$title = $connect->escape_string($title);
+		$title = $connect->escape_string(strip_tags($title));
 		$location = $connect->escape_string($location);
 		$module = $connect->escape_string($module);
 		$addedtime = $connect->escape_string($addedtime);
-		$addedby = $connect->escape_string($addedby);
+		$addedby = $connect->escape_string(strip_tags($addedby));
 		$connect->query("insert into books(title,location,module,addedby,addedtime) VALUES ('$title','$location'
 		,'$module','$addedby','$addedtime')");
 	}
@@ -149,14 +148,27 @@ class get_books {
 class admin {
 	private $connection;
 	function __construct() {
+		session_start();
 		$this->connection = new connect();
 	}
+	public function is_admin() {
+		$admin = $_SESSION['name'];
+		$query = "select admin from users where name='$admin' AND admin=1";
+		$result = $this->connection->query($query)->num_rows;
+		if($result) {
+			$_SESSION['admin'] = $admin;
+			session_regenerate_id();
+			return true;
+		}else{
+			unset($_SESSION['admin']);
+			return false;
+		}
+	}
 	public function get_members() {
-		$qeury = "select * from users ORDER BY name";
+		$qeury = "select * from users ORDER BY id";
 		$result = $this->connection->query($qeury);
-		while($row = $result->fetch_object()){
+		while($row = $result->fetch_object()) {
 			echo "<tr class='tr'>";
-			fb::info($row->name);
 			echo '<td>'.$row->id.'</td>';
 			echo '<td>'.$row->name.'</td>';
 			echo '<td>'.$row->email.'</td>';
@@ -185,12 +197,12 @@ class admin {
 		}
 	}
 	public function get_files() {
-		$query = "select * from books";
+		$query = "select * from books ORDER BY module DESC";
 		$result = $this->connection->query($query);
-		while($row = $result->fetch_object()){
+		while($row = $result->fetch_object()) {
 			echo "<tr class='tr'>";
 			echo '<td>'.$row->id.'</td>';
-			echo '<td>'.$row->title.'</td>';
+			echo '<td>'.strip_tags($row->title).'</td>';
 			echo '<td>'.$row->location.'</td>';
 			echo '<td>'.$row->module.'</td>';
 			echo '<td>'.$row->addedby.'</td>';
@@ -208,7 +220,7 @@ class admin {
 			}
 		}
 	}
-	public function get_affichage(){
+	public function get_affichage() {
 		$query = "select * from affichage";
 		$result = $this->connection->query($query);
 		while ($row = $result->fetch_object()) {
@@ -223,7 +235,7 @@ class admin {
 			echo "</tr>";
 		}
 	}
-	public function edit_affichage(){
+	public function edit_affichage() {
 		if (isset($_POST['delete'])) {
 			foreach ($_POST['check'] as $key) {
 				$query = "delete from affichage where id='$key'";
@@ -231,30 +243,33 @@ class admin {
 			}
 		}
 	}
-	public function add_affichage(){
-		$title = $_POST['title'];
-		$groupe = $_POST['groupe'];
-		$module = $_POST['module'];
+	public function add_affichage() {
+		$linktitle = $this->connection->escape_string(strip_tags($_POST['linktitle']));
+		$groupe = $this->connection->escape_string(strip_tags($_POST['groupe']));
+		$module = $this->connection->escape_string(strip_tags($_POST['module']));
 		$date = date("y/m/d h:i");
 		session_start();
-		$addedby = $_SESSION['name'];
-		$affichage = $_POST['affichage'];
-		$query = "insert into affichage(title,groupe,module,time,addedby,affichage) VALUES ('$title','$groupe',
-			'$module','$date','$addedby','$affichage')";
+		$addedby = $this->connection->escape_string($_SESSION['name']);
+		$affichage = $this->connection->escape_string(strip_tags($_POST['affichage']));
+		$link = $this->connection->escape_string(strip_tags($_POST['link']));
+		$query = "insert into affichage(groupe,module,time,addedby,affichage,linktitle,link) VALUES ('$groupe',
+			'$module','$date','$addedby','$affichage','$linktitle','$link')";
 		$this->connection->query($query);
+		$this->email_afficahge();
 	}
-	/*public static function admin_exist($email,$pass) {
-		$connect = new connect();
-		$query = "select * from users WHERE email='$email' AND pass = '$pass' AND admin = 1";
-		$result = $connect->query($query)->num_rows;
-		if($result) {
-			// start admin session
-			session_start();
-			$_SESSION['admin'] = "admin";
-		}else{
-			die('this page is out of your authorothies');
+	private function email_afficahge() {
+		$groupe = $_POST['groupe'];
+		$groupe = explode(" ", $groupe);
+		foreach($groupe as $row) {
+			$query = "select email from users WHERE groupe='$row'";
+			$result = $this->connection->query($query);
+			while($email = $result->fetch_object()) {
+				$subject = "nouveau affichage";
+				$msg = "nauvau affichage concernant votre groupe";
+				mail($email->email, $subject, $msg);
+			}
 		}
-	}*/
+	}
 }
 class user_login
 {
@@ -273,16 +288,14 @@ class user_login
 		$query = "select * from users WHERE email='$this->email' and pass='$this->pass'";
 		$result = $this->connection->query($query)->fetch_object();
 		$this->name = $result->name;
-		// check if user is an admin
-		if($result->admin){
-			$_SESSION['admin'] = 'admin';
-		}
 		if($this->ext_valid()) {
 			fb::info('login success');
 			$_SESSION['user'] = "user";
 			$_SESSION['name'] = $this->name;
 			$_SESSION['email'] = $this->email;
+			// check if admin
 			fb::info('sessions was set to '.$_SESSION['name']);
+			session_regenerate_id(); 
 			functions::redirect('ctr.php');
 		}else {
 			fb::error('user does not exist');
@@ -296,8 +309,8 @@ class user_login
 			fb::info('user exist');
 			return true;
 		}else {
-			fb::error('user does not exost');
-			$this->errors[] = "name or password wrong";
+			fb::error('user does not exist');
+			$this->errors[] = "name or password wrong .";
 			return false;
 		}
 	}
@@ -315,7 +328,7 @@ class user_subscribe
 	private $pass;
 	private $email;
 	private $groupe;
-	private $max = 12;
+	private $max = 30;
 	private $min = 4;
 	private $errors = array();
 	public function user_subscribe()
@@ -356,10 +369,10 @@ class user_subscribe
 	}
 	private function user_add()
 	{
-		$name = $this->connection->escape_string($this->name);
-		$pass = $this->connection->escape_string($this->pass);
-		$email = $this->connection->escape_string($this->email);
-		$groupe = $this->connection->escape_string($this->groupe);
+		$name = $this->connection->escape_string(strip_tags($this->name));
+		$pass = $this->connection->escape_string(strip_tags($this->pass));
+		$email = $this->connection->escape_string(strip_tags($this->email));
+		$groupe = $this->connection->escape_string(strip_tags($this->groupe));
 		$query = "insert into users (name,pass,email,groupe) VALUES ('$name','$pass','$email','$groupe')";
 		$this->connection->query($query);
 	}
@@ -416,6 +429,11 @@ class analyse
 			$this->section = 'index';
 		}
 		$this->hits = 1;
+		$this->ip = $this->connection->escape_string($this->ip);
+		$this->browser = $this->connection->escape_string($this->browser);
+		$this->name = $this->connection->escape_string($this->name);
+		$this->section = $this->connection->escape_string(strip_tags($this->section));
+		$this->date = $this->connection->escape_string($this->date);
 		$this->add();
 		$this->new_visits();
 		fb::groupEnd();
@@ -424,10 +442,7 @@ class analyse
 		if(!isset($_COOKIE['user'])){
 			$query = "insert into analyse2(ip,time) VALUES ('$this->ip','$this->date')";
 			$this->connection->query($query);
-			setcookie("user", "user", time()+3600*24*365*10);
-			fb::info('cookie was not set ');
-		}else{
-			fb::info('cookie is set');
+			setcookie("user", "user", time()+3600*24*365*100);
 		}
 	}
 	private function add()
@@ -446,12 +461,12 @@ class analyse
 	{
 		$query = "select id from analyse2";
 		$result = $this->connection->query($query)->num_rows;
-		echo "visitors : $result";
+		echo "visiteurs : $result";
 	}
 	public function books_number(){
 		$query = "select id from books";
 		$result = $this->connection->query($query)->num_rows;
-		echo "files : $result";
+		echo "documents : $result";
 	}
 }
 class affichage
@@ -461,31 +476,21 @@ class affichage
 		$this->connection = new connect();
 		if($_GET['groupe'] == 0) {
 			$query = "select * from affichage ORDER BY id DESC ";
-			$result = $this->connection->query($query);
-			echo "<ol>";
-			echo "<div class='list'>";
-			while($row = $result->fetch_object()) {
-				echo "<li class='bottom'>";
-				echo "<h2>groupe(s) : $row->groupe<br> module : $row->module <br> Date : $row->time</h2>";
-				echo "<h3><ul><li>".nl2br($row->affichage)."</li></ul></h3>";
-				echo "By : ".$row->addedby;
-				echo "</li>";
-			}
-			echo "</div></ol>";	
-		}else{
-			$groupe = $_GET['groupe'];
+			}else{
+				$groupe = $_GET['groupe'];
 			$query = "select * from affichage where groupe LIKE '%$groupe%' ORDER BY id DESC ";
+			}
 			$result = $this->connection->query($query);
 			echo "<ol>";
 			echo "<div class='list'>";
 			while($row = $result->fetch_object()) {
 				echo "<li class='bottom'>";
-				echo "<h2>groupe(s) : $row->groupe <br> module : $row->module <br> Date : $row->time</h2>";
+				echo "<h2>groupe(s) : $row->groupe<br> module : $row->module </h2>";
 				echo "<h3><ul><li>".nl2br($row->affichage)."</li></ul></h3>";
-				echo "By : ".$row->addedby;
+				echo "<h3>Lien : <a href='$row->link'>$row->linktitle</a></h3>";
+				echo "Par : $row->addedby / Date : $row->time";
 				echo "</li>";
 			}
 			echo "</div></ol>";	
-		}
 	}
 }

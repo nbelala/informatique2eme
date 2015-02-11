@@ -23,22 +23,22 @@ $analyse = new analyse();
 			echo '<li class="element"><a href="index.php?section='.$element.'">' . $element . '</a></li>';
 		}
 		?>
-		<li class="element"><a href="user.php?sub&section=login">Subscribe</a></li>
+		<li class="element"><a href="user.php?sub&section=login">s'inscrire</a></li>
 		<li class="element"><a href="index.php">About</a></li>
 	</ul>
 </header>
 <div class="content">
 	<form action="affichage.php" method="get">
-		<label for="groupe"> Search By groupe : </label>
+		<label for="groupe"> Par groupe : </label>
 		<select name="groupe" class="select">
-			<option value="0">All</option>
+			<option value="0">Tous</option>
 			<?php 
 			for($i = 1; $i <= 16; $i++){
 				echo "<option value='$i'>$i</option>";
 			}	
 			?>
 		</select>
-		<input type="submit" name="submit" value="Search" class="search"/>
+		<input type="submit" name="submit" value="Chercher" class="search"/>
 	</form>
 <?php
 	$affichage = new affichage();

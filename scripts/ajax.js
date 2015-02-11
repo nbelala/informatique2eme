@@ -4,7 +4,7 @@
 $(document).ready(function(){
   $.ajaxSetup({
     type: "POST",
-    timeout: 3000,
+    timeout: 10000,
     statusCode: {
       404: function(){
         alert('page not found');

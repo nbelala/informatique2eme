@@ -23,7 +23,7 @@ $analyse = new analyse();
 			echo '<li class="element"><a href="index.php?section='.$element.'">' . $element . '</a></li>';
 		}
 		?>
-		<li class="element"><a href="user.php?sub&section=login">Subscribe</a></li>
+		<li class="element"><a href="user.php?sub&section=login">s'inscrire</a></li>
 		<li class="element"><a href="index.php">About</a></li>
 	</ul>
 </header>
@@ -36,11 +36,12 @@ if (isset($_GET['section'])) {
 	}
 }else {
 	?>
-	<h1 >Welcome</h1 >
-	<h2 >the website is empty because its under development right now . <br >
-	     You can participate in the development on  :
-		<a href="https://github.com/Armada-dev/books4free" ><u >Github</u ></a > <br />
-		<h2> <u>Site Statistics :</u> <br><br>
+	<h1 >Bienvenu</h1 >
+	<h2>Vous pouvez telecharger des document ou aussi partager : <u><a class="text-button" href="user.php?login">s'inscrire</a></u> . <br><br>
+	    Le site est open source, pour participer au development de site :
+		<a class="text-button" href="https://github.com/Armada-dev/informatique2eme" ><u >Github</u ></a >. <br />
+		<h2> <u> Statistics de site :</u> <br><br>
+			<div class="statistcs">
 	<?php
 		$analyse->visits();
 		echo "<br>";
@@ -48,6 +49,7 @@ if (isset($_GET['section'])) {
 		echo "<br>";
 		$analyse->books_number();
 	?>
+			</div>
 	</h2>
 	</h2 >
 <?php

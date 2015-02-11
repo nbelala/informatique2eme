@@ -1,6 +1,7 @@
 <?php
 // this is the config file
-
+// timezone default
+date_default_timezone_set('Africa/Algiers');
 // database configuration :
 class database {
 	public static $host = 'localhost';

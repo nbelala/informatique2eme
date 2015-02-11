@@ -4,6 +4,7 @@ require_once 'include/class.php';
 fb::info('debug started');
 session_start();
 $analyse = new analyse();
+$admin = new admin();
 ?>
 <html>
 <head>
@@ -15,7 +16,6 @@ $analyse = new analyse();
 <?php
 if($_SESSION['user'] == "user"){
 	fb::info('session is set : '.$_SESSION['user']);
-
 if (isset($_POST['submit'])) {
 	// calling the object that will add book to database
 	// after validating the inputs
@@ -24,9 +24,12 @@ if (isset($_POST['submit'])) {
 }
 ?>
 <body>
+	<div>
+	<h1><a href="index.php" class="retourner"><-- Retourner</a></h1>
+</div>
 	<?php
-		if ($_SESSION['admin'] == 'admin') {
-			echo "<a href='admin.php?section=admin'>Admin panel</a>";
+		if ($admin->is_admin()) {
+			echo "<h1><a href='admin.php?section=admin'>Admin panel</a></h1>";
 		}
 	?>
 	<div class="form">
