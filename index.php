@@ -36,11 +36,11 @@ if (isset($_GET['section'])) {
 	}
 }else {
 	?>
-	<h1 >Bienvenu</h1 >
-	<h2>Vous pouvez telecharger des document ou aussi partager : <u><a class="text-button" href="user.php?login">s'inscrire</a></u> . <br><br>
-	    Le site est open source, pour participer au development de site :
+	<h1 >Bienvenue !</h1 >
+	<h2>Vous pouvez télécharger des documents ou aussi partager : <u><a class="text-button" href="user.php?login">s'inscrire</a></u> . <br><br>
+	    Le site est open-source. Pour participer au développement du site :
 		<a class="text-button" href="https://github.com/Armada-dev/informatique2eme" ><u >Github</u ></a >. <br />
-		<h2> <u> Statistics de site :</u> <br><br>
+		<h2> <u> Statistiques :</u> <br><br>
 			<div class="statistcs">
 	<?php
 		$analyse->visits();
